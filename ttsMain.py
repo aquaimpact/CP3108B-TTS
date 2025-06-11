@@ -1,5 +1,6 @@
 from ttsCore import *
 
+# This is the CLI version of the project
 def main():
     print("Google Cloud Text-to-Speech API Test")
     print(("-" * 60) + "\n")
