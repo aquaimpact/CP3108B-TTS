@@ -2,7 +2,6 @@ from typing import Sequence
 
 import google.cloud.texttospeech as tts
 
-
 def unique_languages_from_voices(voices: Sequence[tts.Voice]):
     language_set = set()
     for voice in voices:
@@ -52,5 +51,3 @@ def text_to_wav(voice_name: str, text: str):
     with open(filename, "wb") as out:
         out.write(response.audio_content)
         print(f'Generated speech saved to "{filename}"')
-
-text_to_wav("en-AU-Neural2-A", "What is the temperature in Sydney?")
