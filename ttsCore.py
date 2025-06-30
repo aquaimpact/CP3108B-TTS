@@ -31,6 +31,7 @@ def list_voices(language_code=None):
         gender = tts.SsmlVoiceGender(voice.ssml_gender).name
         rate = voice.natural_sample_rate_hertz
         print(f"{languages:<8} | {name:<24} | {gender:<8} | {rate:,} Hz")
+    return [voice.name for voice in voices]
 
 def text_to_wav(voice_name: str, text: str):
     language_code = "-".join(voice_name.split("-")[:2])
