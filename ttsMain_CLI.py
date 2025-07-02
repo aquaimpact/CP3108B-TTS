@@ -1,4 +1,4 @@
-from ttsCore import *
+from tts_app.logic.tts_core import *
 
 # This is the CLI version of the project
 def main():

@@ -9,7 +9,6 @@ def unique_languages_from_voices(voices: Sequence[tts.Voice]):
             language_set.add(language_code)
     return language_set
 
-
 def list_languages():
     client = tts.TextToSpeechClient()
     response = client.list_voices()
@@ -33,7 +32,7 @@ def list_voices(language_code=None):
         print(f"{languages:<8} | {name:<24} | {gender:<8} | {rate:,} Hz")
     return [voice.name for voice in voices]
 
-def text_to_wav(voice_name: str, text: str):
+def text_to_wav(voice_name: str, text: str, filename:str=None):
     language_code = "-".join(voice_name.split("-")[:2])
     text_input = tts.SynthesisInput(text=text)
     voice_params = tts.VoiceSelectionParams(
@@ -48,7 +47,8 @@ def text_to_wav(voice_name: str, text: str):
         audio_config=audio_config,
     )
 
-    filename = f"{voice_name}.wav"
-    with open(filename, "wb") as out:
+    converted_filename = f"{filename}.wav"
+    with open(converted_filename, "wb") as out:
         out.write(response.audio_content)
-        print(f'Generated speech saved to "{filename}"')
+        return (1, converted_filename)
+    return (0, None)
