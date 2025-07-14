@@ -26,13 +26,17 @@ class Results:
         mw = self.main_window
         print(mw.language, mw.voice, mw.textToConvert, mw.audioFileName)
         if not mw.language or not mw.voice or not mw.textToConvert or not mw.audioFileName:
-            self.results_box.setText("Please fill in all fields before converting.")
+            self.update_results("Please fill in all fields before converting.")
             return
         
-        result = text_to_wav(mw.voice, mw.textToConvert, filename=mw.audioFileName)
-        result_text = ""
-        if result[0] == 1:
-            result_text = f"Audio saved as {mw.audioFileName}.wav"
-        else:
-            result_text = "Failed to generate audio."
-        self.update_results(result_text)
+        try:
+            result = text_to_wav(mw.voice, mw.textToConvert, filename=mw.audioFileName)
+            result_text = ""
+            if result[0] == 1:
+                result_text = f"Audio saved to: {result[1]}"
+            else:
+                result_text = str(result[1])
+                print(result_text)
+            self.update_results(result_text)
+        except Exception as e:
+            self.update_results(e)

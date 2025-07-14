@@ -1,4 +1,6 @@
 from typing import Sequence
+import sys
+import os
 
 import google.cloud.texttospeech as tts
 
@@ -32,23 +34,37 @@ def list_voices(language_code=None):
         print(f"{languages:<8} | {name:<24} | {gender:<8} | {rate:,} Hz")
     return [voice.name for voice in voices]
 
+def get_writable_output_path(filename):
+    if getattr(sys, 'frozen', False):  # PyInstaller
+        base_path = os.path.dirname(sys.executable)
+    else:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, filename)
+
 def text_to_wav(voice_name: str, text: str, filename:str=None):
-    language_code = "-".join(voice_name.split("-")[:2])
-    text_input = tts.SynthesisInput(text=text)
-    voice_params = tts.VoiceSelectionParams(
-        language_code=language_code, name=voice_name
-    )
-    audio_config = tts.AudioConfig(audio_encoding=tts.AudioEncoding.LINEAR16)
+    try:
+        gcloud_config_path = os.path.expanduser("~/.config/gcloud/application_default_credentials.json")
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = gcloud_config_path
+        
+        language_code = "-".join(voice_name.split("-")[:2])
+        text_input = tts.SynthesisInput(text=text)
+        voice_params = tts.VoiceSelectionParams(
+            language_code=language_code, name=voice_name
+        )
+        audio_config = tts.AudioConfig(audio_encoding=tts.AudioEncoding.LINEAR16)
 
-    client = tts.TextToSpeechClient()
-    response = client.synthesize_speech(
-        input=text_input,
-        voice=voice_params,
-        audio_config=audio_config,
-    )
+        client = tts.TextToSpeechClient()
+        response = client.synthesize_speech(
+            input=text_input,
+            voice=voice_params,
+            audio_config=audio_config,
+        )
 
-    converted_filename = f"{filename}.wav"
-    with open(converted_filename, "wb") as out:
-        out.write(response.audio_content)
-        return (1, converted_filename)
-    return (0, None)
+        converted_filename = get_writable_output_path(f"{filename}.wav")
+        
+        with open(converted_filename, "wb") as out:
+            out.write(response.audio_content)
+            return (1, converted_filename)
+    
+    except Exception as e:
+        return (0, e)
