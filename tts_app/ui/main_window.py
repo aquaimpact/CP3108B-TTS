@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QMainWindow, QPushButton, QWidget, QVBoxLayout
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Text-to-Speech GUI")
+        self.setWindowTitle("SpeechGen")
         self.setGeometry(100, 100, 600, 400)
 
         # Initialize the input variables
