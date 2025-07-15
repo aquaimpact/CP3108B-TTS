@@ -34,3 +34,14 @@ Type the text to be converted. Multi-line text is supported.
 
 ### Step 4: Output file name
 Provide the output file name to be converted. The file that will be output will be a `.wav` file
+
+### Step 5: Finding the output file
+Upon the successful creation of the audio file, the path to the output file will be shown in the results section.
+
+### Possible errors & how to solve them:
+#### Error 1: (Mac)
+`[Errno 30] Read-only file system: [path]`
+#### Reason:
+This application currently stores the audio file in the current file directory as the application. Hence, if the directory the application is in is a read only, then this error will appear.
+#### Solve it:
+To solve it, move the application to another directory which is also writable and rerun the application again.
