@@ -1,11 +1,34 @@
-from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QLabel, QComboBox, QLineEdit, QTextEdit
+from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QLabel, QComboBox, QLineEdit, QTextEdit, QPushButton, QFileDialog
 from logic.tts_core import list_languages, list_voices
+import platform
+
 
 class InputSelection:
     def __init__(self, main_window):
         self.main_window = main_window
 
         self.layout = QVBoxLayout()
+
+        tts_credentials_layout = QHBoxLayout()
+        tts_credentials_layout.addWidget(QLabel("Google TTS credentials:"))
+        self.tts_credentials_input = QLineEdit()
+        self.tts_credentials_input.setPlaceholderText("Path to the TTS credentials JSON file")
+        self.tts_credentials_input.textChanged.connect(self.on_tts_cred_input_change)
+
+        os_name = platform.system()
+        if os_name == "Windows":
+            print("TODO:")
+            # self.tts_credentials_input.setText("%APPDATA%\gcloud\application_default_credentials.json")
+        else:
+            self.tts_credentials_input.setText("~/.config/gcloud/application_default_credentials.json")
+            
+        tts_credentials_layout.addWidget(self.tts_credentials_input)
+
+        self.tts_button = QPushButton("Open File")
+        self.tts_button.clicked.connect(self.open_tts_creds_file)
+        tts_credentials_layout.addWidget(self.tts_button)
+
+        self.layout.addLayout(tts_credentials_layout)
 
         language_layout = QHBoxLayout()
         language_layout.addWidget(QLabel("TTS Language:"))
@@ -43,3 +66,19 @@ class InputSelection:
     def on_text_convert_input_change(self):
         text = self.text_convert_input.toPlainText()
         self.main_window.textToConvert = text
+
+    def on_tts_cred_input_change(self):
+        text = self.tts_credentials_input.text()
+        self.main_window.tts_creds_path = text
+        print("current file path:", text)
+
+    def open_tts_creds_file(self):
+        file_dialog = QFileDialog(self.main_window)
+        file_dialog.setWindowTitle("Select TTS credentials file")
+        file_dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
+        file_dialog.setViewMode(QFileDialog.ViewMode.Detail)
+
+        if file_dialog.exec():
+            selected_file = file_dialog.selectedFiles()[0]
+            self.tts_credentials_input.setText(selected_file)
+              

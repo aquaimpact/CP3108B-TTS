@@ -3,6 +3,7 @@ import sys
 import os
 
 import google.cloud.texttospeech as tts
+from google.oauth2 import service_account
 
 def unique_languages_from_voices(voices: Sequence[tts.Voice]):
     language_set = set()
@@ -41,9 +42,9 @@ def get_writable_output_path(filename):
         base_path = os.path.abspath(".")
     return os.path.join(base_path, filename)
 
-def text_to_wav(voice_name: str, text: str, filename:str=None):
+def text_to_wav(voice_name: str, text: str, ttsFilePath:str, filename:str=None):
     try:
-        gcloud_config_path = os.path.expanduser("~/.config/gcloud/application_default_credentials.json")
+        gcloud_config_path = os.path.expanduser(ttsFilePath)
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = gcloud_config_path
         
         language_code = "-".join(voice_name.split("-")[:2])
@@ -52,7 +53,6 @@ def text_to_wav(voice_name: str, text: str, filename:str=None):
             language_code=language_code, name=voice_name
         )
         audio_config = tts.AudioConfig(audio_encoding=tts.AudioEncoding.LINEAR16)
-
         client = tts.TextToSpeechClient()
         response = client.synthesize_speech(
             input=text_input,
@@ -61,6 +61,7 @@ def text_to_wav(voice_name: str, text: str, filename:str=None):
         )
 
         converted_filename = get_writable_output_path(f"{filename}.wav")
+        
         
         with open(converted_filename, "wb") as out:
             out.write(response.audio_content)
