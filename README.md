@@ -11,32 +11,32 @@ Choose your language, the voice you want and the text you want to convert and th
 ### Enabling Google TTS
 1. Go to [Google Cloud Console](https://console.cloud.google.com)
 2. Create a project if you havent already done so
-3. Under the Quick access, click APIs & Services ![Google's API & Services](image.png)
-4. Enable APIs and Serices ![alt text](image-1.png)
-5. Search for Text to Speech API ![alt text](image-2.png)
-6. Enable it ![alt text](image-3.png)
+3. Under the Quick access, click APIs & Services ![Google's API & Services](/User%20Guide/image.png)
+4. Enable APIs and Serices ![alt text](/User%20Guide/image-1.png)
+5. Search for Text to Speech API ![alt text](/User%20Guide/image-2.png)
+6. Enable it ![alt text](/User%20Guide/image-3.png)
   ** You may have to setup billing account
 
 ### Getting a service account
 1. Go to [Google Cloud Console](https://console.cloud.google.com)
-2. Using the navigation menu on the left, click on APIs & Services > Credentials ![alt text](image-6.png)
-4. Select Create credentials > Service account ![alt text](image-7.png)
+2. Using the navigation menu on the left, click on APIs & Services > Credentials ![alt text](/User%20Guide/image-6.png)
+4. Select Create credentials > Service account ![alt text](/User%20Guide/image-7.png)
 5. Create Service account name
-![alt text](image-8.png)
-6. Under the Permissions section, select the Cloud Speech-to-Text Service Agent ![alt text](image-9.png)
+![alt text](/User%20Guide/image-8.png)
+6. Under the Permissions section, select the Cloud Speech-to-Text Service Agent ![alt text](/User%20Guide/image-9.png)
 7. Click Done
 
 ### Creating credentials.json and adding it to the application
-1. Go into the service account you just created![alt text](image-4.png)
-2. Go to the Keys tab ![alt text](image-5.png)
-3. Create a new key ![alt text](image-11.png) 
+1. Go into the service account you just created![alt text](/User%20Guide/image-4.png)
+2. Go to the Keys tab ![alt text](/User%20Guide/image-5.png)
+3. Create a new key ![alt text](/User%20Guide/image-11.png) 
 4. Click JSON > Create
 5. Select where you want to store this credentials file.
 ---
 
 ## Using the application
 
-![alt text](image-12.png)
+![alt text](/User%20Guide/image-12.png)
 
 ### Step 1: Google TTS Credentials path
 Enter the path which your credentials is located in (see above for help on how to get it)
