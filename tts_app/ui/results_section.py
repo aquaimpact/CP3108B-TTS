@@ -29,8 +29,9 @@ class Results:
             self.update_results("Please fill in all fields before converting.")
             return
         
-        try:
-            result = text_to_wav(mw.voice, mw.textToConvert, filename=mw.audioFileName)
+        try:  
+            print("Here works!")  
+            result = text_to_wav(mw.voice, mw.textToConvert, ttsFilePath=mw.tts_creds_path, filename=mw.audioFileName)
             result_text = ""
             if result[0] == 1:
                 result_text = f"Audio saved to: {result[1]}"
