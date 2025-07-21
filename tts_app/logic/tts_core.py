@@ -4,6 +4,7 @@ import os
 
 import google.cloud.texttospeech as tts
 from google.oauth2 import service_account
+import langcodes
 
 def unique_languages_from_voices(voices: Sequence[tts.Voice]):
     language_set = set()
@@ -16,10 +17,11 @@ def list_languages():
     client = tts.TextToSpeechClient()
     response = client.list_voices()
     languages = unique_languages_from_voices(response.voices)
-
+    print(len)
     print(f" Languages: {len(languages)} ".center(60, "-"))
     for i, language in enumerate(sorted(languages)):
-        print(f"{language:>10}", end="\n" if i % 5 == 4 else "")
+        lan = langcodes.get(language).display_name()
+        print(f"{lan}", end="\n" if i % 5 == 4 else "")
 
 def list_voices(language_code=None):
     client = tts.TextToSpeechClient()
@@ -69,3 +71,6 @@ def text_to_wav(voice_name: str, text: str, ttsFilePath:str, filename:str=None):
     
     except Exception as e:
         return (0, e)
+
+## Tests:
+list_languages()

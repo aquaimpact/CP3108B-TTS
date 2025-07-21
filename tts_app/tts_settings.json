@@ -1,0 +1,10 @@
+{
+  "google_credentials": {
+    "credentials_path": null,
+    "project_id": null,
+    "service_account_email": null,
+    "is_valid": false
+  },
+  "last_output_directory": "",
+  "remember_settings": false
+}
