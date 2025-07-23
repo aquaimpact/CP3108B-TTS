@@ -10,6 +10,7 @@ class TTSServiceManager:
         self._credentials_path: Optional[str] = None
         self._is_initialized = False
     
+    # TODO: Combine with below one
     def initialize_with_credentials(self, credentials_path: str) -> tuple[bool, str]:
         """Initialize TTS client with specific credentials"""
         try:
@@ -20,7 +21,7 @@ class TTSServiceManager:
             self._client = texttospeech.TextToSpeechClient()
             self._credentials_path = credentials_path
             self._is_initialized = True
-            
+
             return True, "TTS service initialized successfully"
             
         except Exception as e:
@@ -34,6 +35,7 @@ class TTSServiceManager:
         try:
             self._client = texttospeech.TextToSpeechClient()
             self._is_initialized = True
+            
             return True, "TTS service initialized with default credentials"
         except Exception as e:
             self._client = None
@@ -57,11 +59,11 @@ class TTSServiceManager:
         
         try:
             # Try to list voices as a connection test
-            voices = self._client.list_voices()
+            voices = self._client.list_voices(timeout=2)
             voice_count = len(voices.voices)
             return True, f"Connection successful. {voice_count} voices available."
         except Exception as e:
-            return False, f"Connection test failed: {str(e)}"
+            return False, f"Connection failed: {str(e)}"
     
     def get_available_voices(self, language_code: str = None) -> List:
         """Get available voices for a language"""

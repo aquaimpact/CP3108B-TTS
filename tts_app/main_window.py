@@ -25,15 +25,10 @@ class MainWindow(QMainWindow):
     
     def __init__(self):
         super().__init__()
-        print("Setting Up...")
         self._setup_logic_managers()
-        print("Logic Managers Set Up!")
         self._setup_ui()
-        print("UI Set Up!")
         self._setup_connections()
-        print("Connections Set Up!")
         self._load_settings()
-        print("Loaded Settings!")
         self._current_audio_path = None
     
     def _setup_logic_managers(self) -> None:
@@ -56,11 +51,11 @@ class MainWindow(QMainWindow):
         # Main layout
         main_layout = QVBoxLayout(central_widget)
         
-        # Title
-        title = QLabel("Google Text-to-Speech Converter")
-        title.setFont(QFont("Arial", 16, QFont.Bold))
-        title.setAlignment(Qt.AlignCenter)
-        main_layout.addWidget(title)
+        # # Title
+        # title = QLabel("Google Text-to-Speech Converter")
+        # title.setFont(QFont("Arial", 16, QFont.Bold))
+        # title.setAlignment(Qt.AlignCenter)
+        # main_layout.addWidget(title)
         
         # Tab widget
         self.tab_widget = QTabWidget()
@@ -78,7 +73,7 @@ class MainWindow(QMainWindow):
         tts_layout = QVBoxLayout(tts_widget)
         
         # UI Components - Pass voice_data_manager to voice component
-        self.voice_component = VoiceSettingsComponent(self.voice_data_manager)
+        self.voice_component = VoiceSettingsComponent(self.voice_data_manager, self.tts_manager)
         self.audio_component = AudioSettingsComponent()
 
         # Text & SSML editor
@@ -177,20 +172,28 @@ class MainWindow(QMainWindow):
             success, message = self.tts_manager.initialize_with_credentials(
                 settings.google_credentials.credentials_path
             )
-            if success:
+
+            # Testing Internet connection
+            internet_connected, connection_message = self.tts_manager.test_connection()
+
+            if success & internet_connected:
                 # Enable voice component and refresh data
                 self.voice_component.set_credentials_available(True)
                 self.voice_component._refresh_data()
             else:
-                QMessageBox.warning(self, "TTS Initialization", 
-                                  f"Failed to initialize TTS service: {message}")
+                if not success:
+                    QMessageBox.warning(self, "TTS Initialization", 
+                                    f"Failed to initialize TTS service: {message}")
+                if not internet_connected:
+                    QMessageBox.warning(self, "Internet Connection", 
+                                    f"Failed to connect to the internet: {connection_message}")
                 self.voice_component.set_credentials_available(False)
         else:
             # Try default initialization
             success, message = self.tts_manager.initialize_default()
             if success:
                 self.voice_component.set_credentials_available(True)
-                self.voice_component._refresh_data() ## Loads very slowly
+                self.voice_component._refresh_data()
             else:
                 # Show info message about needing to configure credentials
                 self.voice_component.set_credentials_available(False)
@@ -261,7 +264,7 @@ class MainWindow(QMainWindow):
         # Create TTS request from UI components
         voice_config = self.voice_component.get_voice_config()
         audio_config = self.audio_component.get_audio_config()
-        
+
         # Use default output directory if set
         settings = self.settings_manager.get_settings()
         if settings.last_output_directory:
@@ -290,7 +293,7 @@ class MainWindow(QMainWindow):
             ssml_config=ssml_config
         )
 
-        # Start conversion using logic
+        # Start conversion
         self._start_conversion(request)
     
     def _start_conversion(self, request: TTSRequest) -> None:

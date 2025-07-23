@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional
 from google.cloud import texttospeech
 
@@ -21,6 +21,7 @@ class AudioConfig:
     format: str = "MP3"
     speaking_rate: float = 1.0
     pitch: float = 0.0
+    effects_profile_id: list = field(default_factory=list)
     
     def to_google_audio_config(self) -> texttospeech.AudioConfig:
         """Convert to Google TTS AudioConfig"""
@@ -33,7 +34,8 @@ class AudioConfig:
         return texttospeech.AudioConfig(
             audio_encoding=format_mapping[self.format],
             speaking_rate=self.speaking_rate,
-            pitch=self.pitch
+            pitch=self.pitch,
+            effects_profile_id=self.effects_profile_id
         )
 
 @dataclass

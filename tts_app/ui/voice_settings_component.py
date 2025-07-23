@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox
 from PyQt5.QtCore import pyqtSignal, QThread
 from models.tts_config import VoiceConfig
 from logic.voice_data_manager import VoiceDataManager, VoiceInfo
+from logic.tts_service_manager import TTSServiceManager
 from typing import List, Optional
 
 class VoiceSettingsComponent(QWidget):
@@ -11,9 +12,10 @@ class VoiceSettingsComponent(QWidget):
     language_changed = pyqtSignal(str)  # language_code
     voice_changed = pyqtSignal(str)     # voice_name
     
-    def __init__(self, voice_manager: VoiceDataManager, parent=None):
+    def __init__(self, voice_manager: VoiceDataManager, tts_manager: TTSServiceManager, parent=None):
         super().__init__(parent)
         self.voice_manager = voice_manager
+        self.tts_manager = tts_manager
         self._current_voices: List[VoiceInfo] = []
         self._setup_ui()
         self._load_initial_data()
@@ -49,18 +51,10 @@ class VoiceSettingsComponent(QWidget):
         voice_layout.addWidget(self.voice_combo)
         group_layout.addLayout(voice_layout)
         
-        # Gender selection (read-only, populated based on selected voice)
-        gender_layout = QHBoxLayout()
-        gender_layout.addWidget(QLabel("Gender:"))
-        self.gender_combo = QComboBox()
-        self.gender_combo.setEnabled(False)  # Read-only
-        gender_layout.addWidget(self.gender_combo)
-        group_layout.addLayout(gender_layout)
-        
         # Voice type info
         type_layout = QHBoxLayout()
         type_layout.addWidget(QLabel("Voice Type:"))
-        self.type_label = QLabel("Standard")
+        self.type_label = QLabel("")
         self.type_label.setStyleSheet("font-weight: bold; color: #2196F3;")
         type_layout.addWidget(self.type_label)
         type_layout.addStretch()
@@ -164,9 +158,6 @@ class VoiceSettingsComponent(QWidget):
                 break
         
         if selected_voice:
-            # Update gender combo (read-only)
-            self.gender_combo.clear()
-            self.gender_combo.addItem(selected_voice.gender)
             
             # Update voice type label
             self.type_label.setText(selected_voice.voice_type)
@@ -189,6 +180,13 @@ class VoiceSettingsComponent(QWidget):
         self.refresh_button.setText("Refreshing...")
         
         try:
+            # TODO: REMAKE THIS! alr have tts_manager in voice_manager
+            print("REfresh btn pressed")
+            # Test for internet
+            is_connected, connection_msg = self.tts_manager.test_connection()
+            if not is_connected:
+                raise Exception(connection_msg)
+            print("Is connected to internet")
             # Clear cache and reload
             self.voice_manager.refresh_data()
             self._populate_languages()
@@ -196,7 +194,7 @@ class VoiceSettingsComponent(QWidget):
             current_language = self.language_combo.currentData()
             if current_language:
                 self._load_voices_for_language(current_language)
-                
+               
         except Exception as e:
             print(f"Failed to refresh data: {e}")
         finally:

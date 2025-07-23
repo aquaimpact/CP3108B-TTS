@@ -71,7 +71,7 @@ class SSMLEditorComponent(QWidget):
         layout = QVBoxLayout(self)
         
         # Create group box
-        group_box = QGroupBox("SSML Editor")
+        group_box = QGroupBox("Text Editor")
         group_layout = QVBoxLayout(group_box)
         
         # SSML toggle and info
@@ -140,7 +140,7 @@ class SSMLEditorComponent(QWidget):
         editor_layout = QVBoxLayout(editor_widget)
         
         # Editor label
-        editor_layout.addWidget(QLabel("SSML Content:"))
+        editor_layout.addWidget(QLabel("Content:"))
         
         # Text editor with syntax highlighting
         self.ssml_editor = QTextEdit()
