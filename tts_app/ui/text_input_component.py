@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QTextEdit, QGroupBox
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import QCheckBox, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QTextEdit, QGroupBox
+from PyQt5.QtCore import pyqtSignal, Qt
 
 class TextInputComponent(QWidget):
     """UI component for text input with character counting"""
@@ -19,8 +19,12 @@ class TextInputComponent(QWidget):
         group_box = QGroupBox("Text Input")
         group_layout = QVBoxLayout(group_box)
         
-        # Instructions
-        group_layout.addWidget(QLabel("Enter text to convert:"))
+        # Instructions and SSML converter
+        grp_label_layout = QHBoxLayout()
+        grp_label_layout.addWidget(QLabel("Enter text to convert:"))
+        self.use_ssml_checkbox = QCheckBox(text="SSML")
+        grp_label_layout.addWidget(self.use_ssml_checkbox, alignment=Qt.AlignRight)
+        group_layout.addLayout(grp_label_layout)
         
         # Text input
         self.text_input = QTextEdit()
@@ -69,3 +73,14 @@ class TextInputComponent(QWidget):
         """Check if current text is valid"""
         text = self.get_text().strip()
         return bool(text) and len(text) <= self._max_chars
+
+    def get_checkbox_status(self) -> bool:
+        return self.use_ssml_checkbox.isChecked()
+
+    def enable_ssml(self) -> None:
+        self.use_ssml_checkbox.setChecked(False)
+        self.use_ssml_checkbox.setDisabled(False)
+    
+    def disable_ssml(self) -> None:
+        self.use_ssml_checkbox.setChecked(False)
+        self.use_ssml_checkbox.setDisabled(True)

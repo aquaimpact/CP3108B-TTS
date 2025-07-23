@@ -32,11 +32,11 @@ class SettingsTabComponent(QWidget):
         # Google Credentials Section
         self._setup_credentials_section(layout)
         
-        # App Settings Section
-        self._setup_app_settings_section(layout)
-        
         # Connection Test Section
         self._setup_connection_test_section(layout)
+
+        # App Settings Section
+        self._setup_app_settings_section(layout)
         
         # Action Buttons
         self._setup_action_buttons(layout)

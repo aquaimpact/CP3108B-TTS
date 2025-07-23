@@ -74,11 +74,9 @@ class VoiceSettingsComponent(QWidget):
     
     def _populate_languages(self) -> None:
         """Populate language combo box"""
-        print(10)
         self.language_combo.clear()
         try:
             languages = self.voice_manager.get_available_languages()
-            
             
             for code, name in languages:
                 self.language_combo.addItem(name, code)
@@ -128,17 +126,9 @@ class VoiceSettingsComponent(QWidget):
             return
         
         # Group voices by type for better organization
-        voice_groups = {}
         for voice in voices:
-            if voice.voice_type not in voice_groups:
-                voice_groups[voice.voice_type] = []
-            voice_groups[voice.voice_type].append(voice)
-        
-        # Add voices grouped by type
-        for voice_type in sorted(voice_groups.keys()):
-            for voice in voice_groups[voice_type]:
-                display_text = f"{voice.display_name} ({voice.gender})"
-                self.voice_combo.addItem(display_text, voice.name)
+            display_text = f"{voice.display_name} ({voice.gender})"
+            self.voice_combo.addItem(display_text, voice.name)
         
         # Select first voice by default
         if self.voice_combo.count() > 0:
@@ -183,11 +173,12 @@ class VoiceSettingsComponent(QWidget):
             
             # Color code by voice type
             type_colors = {
-                "Neural2": "#4CAF50",    # Green
-                "WaveNet": "#2196F3",    # Blue
-                "Standard": "#FF9800",   # Orange
-                "Studio": "#9C27B0",     # Purple
-                "Polyglot": "#F44336"    # Red
+                "Chirp3-HD": "#3eb78e",
+                "WaveNet": "#f184b7",
+                "Studio": "#4f9de4",
+                "Standard": "#d7c227",
+                "Neural2": "#a44abf",
+                "Polyglot": "#F44336"
             }
             color = type_colors.get(selected_voice.voice_type, "#666666")
             self.type_label.setStyleSheet(f"font-weight: bold; color: {color};")
@@ -199,16 +190,11 @@ class VoiceSettingsComponent(QWidget):
         
         try:
             # Clear cache and reload
-            print(1)
             self.voice_manager.refresh_data()
-            print(2)
             self._populate_languages()
-            print(3)
             # Reload voices for current language
             current_language = self.language_combo.currentData()
-            print(4)
             if current_language:
-                print(current_language)
                 self._load_voices_for_language(current_language)
                 
         except Exception as e:
@@ -220,20 +206,11 @@ class VoiceSettingsComponent(QWidget):
     def get_voice_config(self) -> VoiceConfig:
         """Get current voice configuration"""
         language_code = self.language_combo.currentData() or "en-US"
-        voice_name = self.voice_combo.currentData() or "Standard-A"
-        
-        # Extract just the voice part (e.g., "Standard-A" from "en-US-Standard-A")
-        if voice_name.startswith(language_code):
-            voice_part = voice_name.replace(f"{language_code}-", "")
-        else:
-            voice_part = voice_name
-        
-        gender = self.gender_combo.currentText() or "NEUTRAL"
+        voice_name = self.voice_combo.currentData() or "en-AU-Chirp3-HD-Achird"
         
         return VoiceConfig(
             language_code=language_code,
-            voice_name=voice_part,
-            gender=gender
+            voice_name=voice_name
         )
     
     def set_voice_config(self, config: VoiceConfig) -> None:

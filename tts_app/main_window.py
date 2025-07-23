@@ -9,13 +9,16 @@ from ui.audio_settings_component import AudioSettingsComponent
 from ui.text_input_component import TextInputComponent
 from ui.file_settings_component import FileSettingsComponent
 from ui.settings_tab_component import SettingsTabComponent
+from ui.ssml_editor_component import SSMLEditorComponent
 from logic.tts_worker import TTSWorker
 from logic.tts_service_manager import TTSServiceManager
 from logic.audio_player_manager import AudioPlayerManager
 from logic.settings_manager import SettingsManager
 from logic.voice_data_manager import VoiceDataManager
+from logic.ssml_manager import SSMLManager
 from models.tts_config import TTSRequest
 from models.settings_config import AppSettings
+from models.tts_config import SSMLConfig
 
 class MainWindow(QMainWindow):
     """Main application window with organized UI and Logic separation"""
@@ -39,6 +42,7 @@ class MainWindow(QMainWindow):
         self.audio_manager = AudioPlayerManager()
         self.settings_manager = SettingsManager()
         self.voice_data_manager = VoiceDataManager(self.tts_manager)
+        self.ssml_manager = SSMLManager()
     
     def _setup_ui(self) -> None:
         """Setup the user interface"""
@@ -76,12 +80,15 @@ class MainWindow(QMainWindow):
         # UI Components - Pass voice_data_manager to voice component
         self.voice_component = VoiceSettingsComponent(self.voice_data_manager)
         self.audio_component = AudioSettingsComponent()
-        self.text_component = TextInputComponent()
+
+        # Text & SSML editor
+        self.text_editor = SSMLEditorComponent(self.ssml_manager)
+
         self.file_component = FileSettingsComponent()
         
         tts_layout.addWidget(self.voice_component)
         tts_layout.addWidget(self.audio_component)
-        tts_layout.addWidget(self.text_component)
+        tts_layout.addWidget(self.text_editor)
         tts_layout.addWidget(self.file_component)
         
         # Progress bar
@@ -146,7 +153,18 @@ class MainWindow(QMainWindow):
         # Settings connections
         self.settings_component.credentials_updated.connect(self._on_credentials_updated)
         self.settings_component.settings_changed.connect(self._save_current_settings)
-    
+
+        # Voice selection connections
+        self.voice_component.voice_changed.connect(self._on_voice_changed)
+
+    def _on_voice_changed(self, voice_name: str) -> None:
+        """Handle voice selection change"""
+        # Extract voice type from voice name
+        voice_type = self.voice_data_manager._extract_voice_type(voice_name)
+        
+        # Update text editor compatibility
+        self.text_editor.set_voice_type_compatibility(voice_type)
+
     def _load_settings(self) -> None:
         """Load application settings"""
         settings = self.settings_manager.load_settings()
@@ -156,7 +174,6 @@ class MainWindow(QMainWindow):
         
         # Initialize TTS service if credentials are available
         if settings.google_credentials.credentials_path and settings.google_credentials.is_valid:
-            print("Init TTS service using credentials")
             success, message = self.tts_manager.initialize_with_credentials(
                 settings.google_credentials.credentials_path
             )
@@ -169,7 +186,6 @@ class MainWindow(QMainWindow):
                                   f"Failed to initialize TTS service: {message}")
                 self.voice_component.set_credentials_available(False)
         else:
-            print("Init TTS service using def credentials")
             # Try default initialization
             success, message = self.tts_manager.initialize_default()
             if success:
@@ -231,13 +247,16 @@ class MainWindow(QMainWindow):
             # Switch to settings tab
             self.tab_widget.setCurrentIndex(1)
             return
-        
-        if not self.text_component.is_text_valid:
-            if not self.text_component.get_text().strip():
-                QMessageBox.warning(self, "Warning", "Please enter some text to convert!")
-            else:
-                QMessageBox.warning(self, "Warning", "Text is too long! Maximum 5000 characters allowed.")
+
+        # Validate Content
+        is_valid, error_msg = self.text_editor.validate_content_for_tts()
+
+        if not is_valid:
+            QMessageBox.warning(self, "Validation Error", error_msg)
             return
+        
+        # Get content and determine if it's SSML
+        content, is_ssml = self.text_editor.get_content_for_tts()
         
         # Create TTS request from UI components
         voice_config = self.voice_component.get_voice_config()
@@ -254,13 +273,23 @@ class MainWindow(QMainWindow):
         
         output_path = self.file_component.get_output_path(audio_config.format)
         
+        # Create SSML config if content is SSML
+        ssml_config = None
+
+        if is_ssml:
+            ssml_config = SSMLConfig(
+                enabled=True,
+                ssml_text=content
+            )
+
         request = TTSRequest(
-            text=self.text_component.get_text(),
+            text=content if not is_ssml else "",
             voice_config=voice_config,
             audio_config=audio_config,
-            output_path=output_path
+            output_path=output_path,
+            ssml_config=ssml_config
         )
-        
+
         # Start conversion using logic
         self._start_conversion(request)
     

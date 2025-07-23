@@ -77,13 +77,12 @@ class TTSServiceManager:
         except Exception as e:
             raise RuntimeError(f"Failed to get voices: {str(e)}")
     
-    def synthesize_speech(self, text: str, voice: texttospeech.VoiceSelectionParams, 
-                         audio_config: texttospeech.AudioConfig) -> bytes:
-        """Synthesize speech from text"""
+    def synthesize_speech_with_input_type(self, synthesis_input: texttospeech.SynthesisInput,
+                                   voice: texttospeech.VoiceSelectionParams, 
+                                   audio_config: texttospeech.AudioConfig) -> bytes:
+        """Synthesize speech from synthesis input (supports both text and SSML)"""
         if not self.is_available:
             raise RuntimeError("TTS service is not available")
-        
-        synthesis_input = texttospeech.SynthesisInput(text=text)
         
         response = self._client.synthesize_speech(
             input=synthesis_input,

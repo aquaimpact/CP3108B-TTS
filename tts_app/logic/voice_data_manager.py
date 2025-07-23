@@ -9,7 +9,7 @@ class VoiceInfo:
     name: str
     language_code: str
     gender: str
-    voice_type: str  # Standard, WaveNet, Neural2, etc.
+    voice_type: str  # Chirp3-HD, WaveNet, Studio, Standard, Neural2, Polyglot
     display_name: str
 
 class VoiceDataManager:
@@ -69,7 +69,7 @@ class VoiceDataManager:
                 voice_type = self._extract_voice_type(voice.name)
                 
                 # Create display name
-                display_name = self._create_voice_display_name(voice.name, voice_type)
+                display_name = self._create_voice_display_name(voice.name)
                 
                 voice_info = VoiceInfo(
                     name=voice.name,
@@ -81,7 +81,7 @@ class VoiceDataManager:
                 voice_infos.append(voice_info)
             
             # Sort voices by type and name
-            voice_infos.sort(key=lambda v: (v.voice_type, v.name))
+            voice_infos.sort(key=lambda v: (v.name))
             
             # Cache the results
             self._voices_cache[language_code] = voice_infos
@@ -102,25 +102,28 @@ class VoiceDataManager:
         self.get_available_languages()
     
     def _extract_voice_type(self, voice_name: str) -> str:
-        """Extract voice type from voice name"""
-        if "Neural2" in voice_name:
-            return "Neural2"
+        """
+            Extract voice type from voice name (This is for the pricings) \n
+            The pricings are found on this page: https://cloud.google.com/text-to-speech/pricing?hl=en
+        """
+        if "Chirp3-HD" in voice_name:
+            return "Chirp3-HD"
         elif "Wavenet" in voice_name or "WaveNet" in voice_name:
             return "WaveNet"
-        elif "Standard" in voice_name:
-            return "Standard"
         elif "Studio" in voice_name:
             return "Studio"
+        elif "Standard" in voice_name:
+            return "Standard"
+        elif "Neural2" in voice_name:
+            return "Neural2"
         elif "Polyglot" in voice_name:
             return "Polyglot"
         else:
             return "Standard"
     
-    def _create_voice_display_name(self, voice_name: str, voice_type: str) -> str:
+    def _create_voice_display_name(self, voice_name: str) -> str:
         """Create a user-friendly display name for the voice"""
-        # Extract the voice identifier (e.g., "A", "B", "C")
         parts = voice_name.split('-')
         if len(parts) >= 3:
-            voice_id = parts[-1]
-            return f"{voice_type}-{voice_id}"
+            return " ".join(parts[2:])
         return voice_name

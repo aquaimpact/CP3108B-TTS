@@ -32,9 +32,11 @@ class TTSWorker(QThread):
             
             self.progress_updated.emit(50)
             
+            synthesis_input = self._request.get_synthesis_input()
+                        
             # Synthesize speech
-            audio_content = self._service.synthesize_speech(
-                self._request.text, voice, audio_config
+            audio_content = self._service.synthesize_speech_with_input_type(
+                synthesis_input, voice, audio_config
             )
             
             self.progress_updated.emit(75)
